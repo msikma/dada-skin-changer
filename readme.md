@@ -4,7 +4,7 @@ A simple Visual Basic 6 script that reads from a file and then switches Winamp's
 
 It also stores a bunch of other information in various other files.
 
-<img src="./example.png" alt="Example image" width="918" height="260">
+<img src="./example.png" alt="Example image" width="723" height="260">
 
 This script requires [gen_com.dll](https://github.com/winamp-libre/winamp-libre-archive/tree/master/plugins/gen/gen_com), which is used to communicate with Winamp.
 
