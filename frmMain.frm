@@ -1,13 +1,13 @@
 VERSION 5.00
 Begin VB.Form frmMain 
    Caption         =   "Dada Skin Changer"
-   ClientHeight    =   3375
+   ClientHeight    =   3495
    ClientLeft      =   60
    ClientTop       =   345
    ClientWidth     =   5535
    Icon            =   "frmMain.frx":0000
    LinkTopic       =   "Form1"
-   ScaleHeight     =   3375
+   ScaleHeight     =   3495
    ScaleWidth      =   5535
    StartUpPosition =   3  'Windows Default
    Begin VB.CommandButton btnAbout 
@@ -15,21 +15,21 @@ Begin VB.Form frmMain
       Height          =   375
       Left            =   2400
       TabIndex        =   12
-      Top             =   2880
+      Top             =   3000
       Width           =   1215
    End
-   Begin VB.TextBox textFilename 
+   Begin VB.TextBox textBasedir 
       Height          =   285
       Left            =   120
       TabIndex        =   4
       Text            =   "Text1"
-      Top             =   2400
+      Top             =   2520
       Width           =   3495
    End
    Begin VB.Timer timerUpdate 
       Interval        =   1000
-      Left            =   3360
-      Top             =   360
+      Left            =   4200
+      Top             =   120
    End
    Begin VB.CommandButton btnSetToDefault 
       Caption         =   "&Set to Default Skin"
@@ -37,7 +37,7 @@ Begin VB.Form frmMain
       Height          =   375
       Left            =   120
       TabIndex        =   0
-      Top             =   2880
+      Top             =   3000
       Width           =   2175
    End
    Begin VB.Label labelLastUpdate 
@@ -45,7 +45,7 @@ Begin VB.Form frmMain
       Height          =   255
       Left            =   1440
       TabIndex        =   11
-      Top             =   1800
+      Top             =   1920
       Width           =   3615
    End
    Begin VB.Label Label7 
@@ -53,7 +53,7 @@ Begin VB.Form frmMain
       Height          =   255
       Left            =   120
       TabIndex        =   10
-      Top             =   1800
+      Top             =   1920
       Width           =   1335
    End
    Begin VB.Image Image1 
@@ -69,7 +69,7 @@ Begin VB.Form frmMain
       Height          =   255
       Left            =   120
       TabIndex        =   9
-      Top             =   1440
+      Top             =   1560
       Width           =   1215
    End
    Begin VB.Label Label5 
@@ -77,7 +77,7 @@ Begin VB.Form frmMain
       Height          =   255
       Left            =   120
       TabIndex        =   8
-      Top             =   1080
+      Top             =   1200
       Width           =   1215
    End
    Begin VB.Label textInFile 
@@ -94,7 +94,7 @@ Begin VB.Form frmMain
       Height          =   255
       Left            =   1440
       TabIndex        =   7
-      Top             =   720
+      Top             =   840
       Width           =   3255
    End
    Begin VB.Label labelLastCheck 
@@ -102,7 +102,7 @@ Begin VB.Form frmMain
       Height          =   255
       Left            =   1440
       TabIndex        =   6
-      Top             =   1440
+      Top             =   1560
       Width           =   3495
    End
    Begin VB.Label labelStatus 
@@ -110,15 +110,15 @@ Begin VB.Form frmMain
       Height          =   255
       Left            =   1440
       TabIndex        =   5
-      Top             =   1080
+      Top             =   1200
       Width           =   3495
    End
    Begin VB.Label Label4 
-      Caption         =   "Filename we're listening to:"
+      Caption         =   "Data base directory:"
       Height          =   255
       Left            =   120
       TabIndex        =   3
-      Top             =   2160
+      Top             =   2280
       Width           =   2895
    End
    Begin VB.Label Label3 
@@ -126,16 +126,16 @@ Begin VB.Form frmMain
       Height          =   375
       Left            =   120
       TabIndex        =   2
-      Top             =   720
+      Top             =   840
       Width           =   1695
    End
    Begin VB.Label Label1 
-      Caption         =   "This program will change the Winamp skin based on the contents of a text file."
-      Height          =   495
+      Caption         =   $"frmMain.frx":2A22
+      Height          =   735
       Left            =   120
       TabIndex        =   1
       Top             =   120
-      Width           =   4455
+      Width           =   4215
    End
 End
 Attribute VB_Name = "frmMain"
@@ -146,7 +146,7 @@ Attribute VB_Exposed = False
 Private oWinamp As New WINAMPCOMLib.Application
 
 Dim CurrentSkin As String
-Dim CurrentFilename As String
+Dim CurrentBasedir As String
 Dim DefaultSkin As String
 
 Private Sub btnSetToDefault_Click()
@@ -160,28 +160,45 @@ End Sub
 
 Private Sub Form_Load()
     DefaultSkin = "[base-2.91.wsz"
-    CurrentFilename = "M:\Stuff\Data\winampxp_skin.txt"
+    CurrentBasedir = "M:\Stuff\Data\winampxp\"
     Me.WindowState = 1
-    Call GetSkinFromFile
+    Call FullUpdate
 End Sub
 
-Private Function SetSkinToFile(strSkin As String)
+Private Function SetToFile(strValue As String, strFile As String, strType As String)
+    FileName = CurrentBasedir & strFile & ".txt"
     On Error GoTo ErrorHandler
-    Open CurrentFilename For Output As #1
-        Print #1, strSkin
+    Open FileName For Output As #1
+        Print #1, strValue
     Close #1
-    Call GetSkinFromFile
     Exit Function
 ErrorHandler:
-    labelStatus = "Error (Can't find or open file)"
+    labelStatus = "Error (Can't find or open " & strType & " file)"
+End Function
+
+Private Function SetPlayingToFile()
+    Call SetToFile(oWinamp.Status, "is_playing", "playing")
+End Function
+
+Private Function SetSongToFile()
+    Call SetToFile(oWinamp.CurrentSongFileName, "song", "song")
+End Function
+
+Private Function SetTitleToFile()
+    Call SetToFile(oWinamp.CurrentSongTitle, "title", "title")
+End Function
+
+Private Function SetSkinToFile(strSkin As String)
+    Call SetToFile(strSkin, "skin", "skin")
 End Function
 
 Private Function GetSkinFromFile()
+    FileName = CurrentBasedir & "skin.txt"
     labelStatus = "OK"
     labelLastCheck = Now
     On Error GoTo ErrorHandler
     Dim FileLine As String
-    Open CurrentFilename For Input As #1
+    Open FileName For Input As #1
         Line Input #1, FileLine
     Close #1
     If FileLine <> CurrentSkin Then
@@ -189,10 +206,10 @@ Private Function GetSkinFromFile()
         Call SetWinampSkin(CurrentSkin)
     End If
     textInFile = FileLine
-    textFilename = CurrentFilename
+    textBasedir = CurrentBasedir
     Exit Function
 ErrorHandler:
-    labelStatus = "Error (Can't find or open file)"
+    labelStatus = "Error (Can't find or open skin file)"
 End Function
 
 Private Function SetWinampSkin(strSkin As String)
@@ -200,11 +217,19 @@ Private Function SetWinampSkin(strSkin As String)
     labelLastUpdate = Now
 End Function
 
-Private Sub textFilename_Change()
-    CurrentFilename = textFilename
+Private Function FullUpdate()
     Call GetSkinFromFile
+    Call SetSongToFile
+    Call SetTitleToFile
+    Call SetPlayingToFile
+End Function
+
+Private Sub textBasedir_Change()
+    CurrentBasedir = textBasedir
+    Call FullUpdate
 End Sub
 
 Public Sub timerUpdate_Timer()
-    Call GetSkinFromFile
+    Call FullUpdate
 End Sub
+
